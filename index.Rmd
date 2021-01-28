@@ -1,0 +1,108 @@
+---
+title: "Practical Machine Learning Project"
+author: "M Hernandez"
+date: "1/27/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Background
+Using devices such as Jawbone Up, Nike FuelBand, and Fitbit it is now possible to collect a large amount of data about personal activity relatively inexpensively. These type of devices are part of the quantified self movement – a group of enthusiasts who take measurements about themselves regularly to improve their health, to find patterns in their behavior, or because they are tech geeks. One thing that people regularly do is quantify how much of a particular activity they do, but they rarely quantify how well they do it. In this project, your goal will be to use data from accelerometers on the belt, forearm, arm, and dumbell of 6 participants. They were asked to perform barbell lifts correctly and incorrectly in 5 different ways. More information is available from the website here: http://groupware.les.inf.puc-rio.br/har (see the section on the Weight Lifting Exercise Dataset).
+
+## Objective
+The goal of this project is to predict the manner in which they did the exercise (“classe” variable), using the relevant variables of the dataset. This report describes how you the model was built, the cross validation criteria used, and the expected sample error calculation. Finally, the prediction model will be used to predict 20 different test cases.
+
+## Reproduceability
+To ensure reproduceablity of this work, a random number generator was set at 1234. The packages used for this work are caret, randomForest, rpart, rpart.plot. Also, a piece of code to donwload the data directly from the source is included.
+
+## Model Building
+Two ML models will be presented in this document: Decision Tree and Random Forest. The decision to choose the final model will be based on its accuracy. This models were chosen because of the feature detection capabilities. this means that the algorithms will handle the feature selection by themselves.
+
+## Cross-validation
+Since the testing dataset "pml-testing.csv" does not contain the "classe" variable, the cross-validation will be performed by subsampling the training dataset using the 25% of the data to create a subtesting dataset. 75% of the data will be used to create the subtraining dataset. Accuracy of the prediction will be tested against the subtesting dataset. The sample size is large enough to allow subsampling (n=19622 rows)
+
+## Expected error
+The expected out-of-sample error will be calculated from the accuracy of the prediction as 1- accuracy.
+
+## Code and Results
+### Preparation
+
+```{r download, echo=TRUE}
+# Downloading the data from the sources:
+filename <- "pml-training.csv"
+myURL <- "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"
+if (!file.exists(filename)){
+        fileURL <- myURL
+        download.file(fileURL, filename, method="curl")
+}  
+filename <- "pml-testing.csv"
+myURL <- "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv"
+if (!file.exists(filename)){
+        fileURL <- myURL
+        download.file(fileURL, filename, method="curl")
+}
+# Installing the required packages
+suppressMessages(library(rpart))
+suppressMessages(library(rpart.plot))
+suppressMessages(library(caret))
+suppressMessages(library(randomForest))
+# Setting the random number generator
+set.seed(1234)
+```
+
+### Data Loading and Cleaning 
+``` {r, echo=TRUE}
+# Load training and testing datasets
+training <- read.csv("pml-training.csv", na.strings = c("NA", "#DIV/0!", ""))
+testing <- read.csv("pml-testing.csv", na.strings = c("NA", "#DIV/0!", ""))
+# Exploring the data
+dim(training)
+dim(testing)
+# Deleting the variables with NA values
+training <- training[,colSums(is.na(training)) == 0]
+testing <- testing[,colSums(is.na(testing)) == 0]
+# Deleting not needed the variables describing time and users
+training <- training[,-c(1:7)]
+testing <- testing[,-c(1:7)]
+# Converting classe variable to factors
+training$classe <- as.factor(training$classe)
+#Subsampling the training dataset
+trainingset <- createDataPartition(y= training$classe, p = 0.75, list = FALSE)
+train <- training[trainingset, ]
+test <- training[-trainingset, ]
+```
+### Model Selection
+* Decision Tree
+``` {r, echo=TRUE}
+fitclass <- rpart(classe ~ ., data = train, method = "class")
+predclass <- predict(fitclass, test, type = "class")
+rpart.plot(fitclass, main = "Classification Tree", faclen = 0)
+```
+
+* Random Forest
+``` {r, echo=TRUE}
+fitrf <- randomForest(classe ~ ., data = train, method = "class")
+predrf <- predict(fitrf, test, type = "class")
+```
+* Accuracy Comparison
+``` {r, echo=TRUE}
+# Decision Tree accuracy
+confusionMatrix(predclass, test$classe)$overall[1]
+# Random Forest accuracy
+confusionMatrix(predrf, test$classe)$overall[1]
+```
+Based on the accuracy of the prediction, the random forest model will be used to predict the outcome in the testing dataset
+### Expected error
+``` {r, echo=TRUE}
+1- confusionMatrix(predrf, test$classe)$overall[1]
+```
+The expected error is 4%
+
+### Prediction
+``` {r, echo=TRUE}
+pfin <- predict(fitrf, testing, type = "class")
+pfin
+```
