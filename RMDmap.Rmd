@@ -1,0 +1,61 @@
+---
+title: "My Leaflet Map"
+author: "Miguel Hernandez"
+date: "2/12/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r , echo=FALSE}
+library(leaflet)
+md_cities <- data.frame(name = c("Houston", "San Antonio", "Dallas", "Austin", "Fort Worth", "El Paso", "Arlington",
+                                 "Corpus Christi", "Plano", "Laredo", "Lubbock", "Garland", "Irving", "Amarillo",
+                                 "Grand Prairie", "McKinney", "Frisco", "Brownsville", "Pasadena", "Killeen",
+                                 "McAllen", "Mesquite", "Midland", "Denton", "Waco", "Carrollton", "Round Rock",
+                                 "Odessa","Abilene", "Pearland", "Richardson", "Sugar Land", "Beaumont",
+                                 "The Woodlands", "College Station", "Lewisville", "League City", "Tyler",
+                                 "Wichita Falls", "Allen", "San Angelo", "Edinburg", "Conroe", "Bryan", "Mission",
+                                 "New Braunfels", "Longview","Pharr", "Flower Mound", "Baytown", "Cedar Park",
+                                 "Temple", "Atascocita","Missouri City", "Georgetown", "North Richland Hills",
+                                 "Mansfield", "Victoria", "Rowlett", "Harlingen", "Pflugerville", "San Marcos",
+                                 "Spring", "Euless", "Grapevine", "DeSoto", "Galveston"),
+                        pop = c(2320268, 1532233, 1345047, 964254, 895008, 682669, 398123, 326554,
+                                            288061, 261639, 255885, 242507, 242242, 199924, 194614, 191645, 188170,
+                                            183392, 153219, 149103, 143433, 142816, 142344, 138541, 138183, 135710,
+                                            128739, 123334, 122999, 122149, 120981, 118600, 118428, 116278, 116218,
+                                            106586, 106244, 105729, 104576, 103383, 100215, 98665, 87654, 85445,
+                                            84827, 84612, 81647, 79707, 77329, 77024, 76999, 76256, 75114, 74705,
+                                            74180, 70836, 70981, 67015, 66285, 65436, 64431, 63509, 57932, 57346,
+                                            53976, 53523, 50457),
+                        lat = c(29.78, 29.47, 32.79, 30.31, 32.78, 31.85, 32.7, 27.73, 33.05, 27.55, 33.57,
+                                32.91, 32.86, 35.2, 32.69, 33.2, 33.15, 26, 29.66, 31.08, 26.22, 26.4, 32.03,
+                                33.22, 31.56, 32.99, 30.52, 31.88, 32.45, 29.56, 32.97, 29.6, 30.08, 30.17,
+                                30.59, 33.05, 29.49, 32.32, 33.91, 33.11, 31.44, 26.32, 30.32, 30.67, 26.2,
+                                29.7, 32.52, 26.17, 33.03, 29.76, 30.51, 31.11, 29.98, 29.56, 30.66, 32.86,
+                                32.57, 28.83, 32.92, 26.19, 30.45, 29.88, 30.06, 32.85, 32.93, 32.6, 29.24),
+                        lng = c(-95.39, -98.52, -96.77, -97.76, -97.35, -106.43, -97.13, -97.28, -96.75,
+                                -99.49, -101.89, -96.63, -96.97, -101.83, -97.02, -96.67, -96.82, -97.46, -95.15,
+                                -97.73, -98.25, -98.98, -102.11, -97.14, -97.19, -96.9, -97.67, -102.34, -99.74,
+                                -95.32, -96.71, -95.63, -94.14, -95.51, -96.3, -96.98, -95.11, -95.31, -98.53,
+                                -96.67, -100.45, -98.16, -95.47, -96.37, -98.32, -98.12, -94.76, -98.19, -97.11,
+                                -94.97, -97.82, -97.38, -95.19, -95.54, -97.69, -97.22, -97.12, -96.98, -96.55,
+                                -97.7, -97.61, -97.93, -95.38, -97.08, -97.07, -96.86, -94.86))
+
+pal <- colorFactor(palette = c("darkblue", "darkgreen"), domain = format(round(md_cities$pop/1e6,1), trim = TRUE))
+
+md_cities %>%
+  leaflet() %>%
+  addTiles() %>%
+  addCircles(weight = 1, radius = sqrt(md_cities$pop)*15, 
+             label = paste(md_cities$name,": ",format(round(md_cities$pop/1e6,2), trim = TRUE),"M Habitants"), 
+             labelOptions = labelOptions(style = list(
+               "font-style" = "bold",
+               "font-size" = "18px"
+             )),
+             color = ~pal(format(round(md_cities$pop/1e6,1))), fillOpacity = .5) %>%
+  addLegend("bottomright", pal = pal, values = format(round(md_cities$pop/1e6,1), trim = TRUE),
+            title = "Est. Population (2019)")
+```
