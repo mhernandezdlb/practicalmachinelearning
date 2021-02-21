@@ -1,91 +1,16 @@
----
-title: "Corrosion Model for Vertical Pipes"
-author: "Miguel Hernandez"
-date: "2/20/2021"
-output: slidy_presentation
----
+#
+# This is the server logic of a Shiny web application. You can run the
+# application by clicking 'Run App' above.
+#
+# Find out more about building applications with Shiny here:
+#
+#    http://shiny.rstudio.com/
+#
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
-```
-
-## Introduction
-
-These slides summarize the process to build a very simple corrosion model for vertical pipelines that transport water from the subsurface. A shiny App was built to show a profile of corrosion from subsurface to surface. It allows to perform sensibility analysis on the following variables
-
-- Pressure
-- Temperature
-- Depth
-- Content of Co2
-- Composition of the pipeline (carbon and chrome)
-- Internal Diameter
-- Water Rate
-
-## Shiny App Building
-
-The app uses a Ui.R File and Server.R file.
-
-- The Ui.R File contains the definitions of the application
-- The Server.R file contains the logic to run the Shiny web App
-
-## Ui.R File
-
-```{r , echo = TRUE, eval=FALSE}
-library(shiny)
-shinyUI(fluidPage(
-    titlePanel("Data Input"),
-    sidebarLayout(
-        sidebarPanel(
-            sliderInput("Press","Pick Min and Max Pressure:",
-                        min = 0,max = 5000,value = c(100,4000),step = 100
-            ),
-            sliderInput("Temp","Pick Min and Max Temperature:",
-                        min = 0,max = 300,value = c(80,215),step = 10
-            ),
-            sliderInput("Depth","Indicate Depth:",
-                        min = 1000,max = 10000,value = 5000,step = 100
-            ),
-            sliderInput("nodes","Nodes:",
-                        min = 10,max = 100,value = 20,step = 10
-            ),
-            sliderInput("coeff", "Corrosion Inhibitor Efficiency:",
-                        min = 0,max = 100,value = 50,step = 1
-            ),
-            sliderInput("id",
-                        "Internal Diameter:",
-                        min = 0.1,max = 5,value = 2.992,step = 0.001
-            ),
-            sliderInput("co2",
-                        "CO2 Percentage:",
-                        min = 0,max = 100,value = 2,step = 1
-            ),
-            sliderInput("carbon",
-                        "Carbon Content Percentage:",
-                        min = 0,max = 1,value = 0.38,step = 0.01
-            ),
-            sliderInput("chrome",
-                        "Chrome Content Percentage:",
-                        min = 0,max = 1,value = 0.15,step = 0.01
-            ),
-            sliderInput("water",
-                        "Water Rate:",
-                        min = 0,max = 10000,value = 4000,step = 100
-            )
-    ),
-        mainPanel(
-            h3("Corrosion Profile"),
-            plotOutput("contents"),
-            textOutput("documentation")
-        )
-    )
-))
-```
-
-## Ui.R File
-
-```{r , echo = TRUE, eval=FALSE}
 library(shiny)
 library(dplyr)
+
+# Define server logic required to draw a plot
 shinyServer(function(input, output) {
     
     data <- reactive({
@@ -143,10 +68,3 @@ shinyServer(function(input, output) {
         analysis with different variables"
     })
 })
-```
-
-## Corrosion Model Shiny App
-
-The can be found in the following link: https://mbastida.shinyapps.io/CorrosionModel/
-
-Thanks for your attention
